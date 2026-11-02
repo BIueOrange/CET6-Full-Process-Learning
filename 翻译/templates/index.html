@@ -11,6 +11,7 @@
         <header class="header">
             <h1>🌐 CET-6 翻译（段落汉译英）</h1>
             <div class="header-info">出题 → 限时翻译 → AI 评分 → 对照参考译文与术语解析</div>
+            <div style="margin-top:12px"><a class="btn btn-ghost btn-sm" href="/history" style="text-decoration:none">📜 历史记录</a></div>
         </header>
 
         <div class="card">
@@ -82,7 +83,7 @@
             <div id="scoreContent"></div>
             <div id="referenceContent"></div>
             <div style="margin-top:20px;text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-                <button class="btn btn-green" onclick="saveExercise()">💾 保存到 my/</button>
+                <button class="btn btn-green" id="submitRecordBtn" onclick="submitRecord()">📥 提交记录</button>
                 <button class="btn btn-ghost" onclick="restart()">🔄 再来一段</button>
             </div>
         </div>

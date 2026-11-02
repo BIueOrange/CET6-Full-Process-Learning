@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📜 历史记录</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+    .back-link { display: inline-block; margin-bottom: 16px; text-decoration: none; }
+    .hist-item { border: 1px solid #e9ecef; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: #fff; cursor: pointer; transition: all .2s; }
+    .hist-item:hover { border-color: #667eea; }
+    .hist-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .hist-type { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; color: #fff; }
+    .hist-type.翻译 { background: linear-gradient(135deg, #2196f3, #42a5f5); }
+    .hist-type.写作 { background: linear-gradient(135deg, #8e24aa, #ab47bc); }
+    .hist-time { color: #888; font-size: 13px; }
+    .hist-score { font-size: 18px; font-weight: 800; color: #667eea; margin-left: auto; }
+    .hist-preview { color: #555; font-size: 13px; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hist-detail { display: none; margin-top: 12px; border-top: 1px dashed #e9ecef; padding-top: 12px; }
+    .hist-item.open .hist-detail { display: block; }
+    .hd-block { margin-bottom: 12px; }
+    .hd-label { font-weight: 700; color: #667eea; font-size: 13px; margin-bottom: 4px; }
+    .hd-text { background: #f8f9fa; border-radius: 8px; padding: 10px 12px; font-size: 14px; line-height: 1.7; white-space: pre-wrap; color: #2c3e50; }
+    .hd-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; background: #eef1ff; color: #5566cc; margin-bottom: 8px; }
+    .eval-line { font-size: 13px; line-height: 1.7; margin-bottom: 6px; }
+    .eval-line b { color: #667eea; }
+    .eval-list { margin: 4px 0 0 16px; font-size: 13px; line-height: 1.7; color: #424242; }
+    .empty { text-align: center; color: #888; padding: 40px 0; line-height: 1.8; }
+</style>
+</head>
+<body>
+<div class="container" style="max-width:900px">
+    <div class="header">
+        <h1>📜 历史记录</h1>
+        <div class="header-info">翻译 · 写作 的提交记录（最近优先）</div>
+    </div>
+    <div class="card">
+        <a href="/" class="btn btn-ghost btn-sm back-link">← 返回练习</a>
+        <div id="histList"><div class="empty">加载中…</div></div>
+    </div>
+</div>
+<script>
+'use strict';
+function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+const LABELS = {
+    score: '得分', level: '档次', word_count: '词数',
+    accuracy: '准确性', fluency: '流畅性', term_use: '术语运用', grammar: '语法句式',
+    task_achievement: '切题与论点', coherence: '结构与连贯', vocab: '词汇',
+    strengths: '亮点', missed_terms: '漏译/错译术语', errors: '典型问题', feedback: '提升建议'
+};
+
+function renderEval(r) {
+    if (!r || typeof r !== 'object') return '';
+    const lines = [];
+    for (const k of Object.keys(r)) {
+        if (k === 'score' || k === 'level' || k === 'word_count') continue;
+        const v = r[k];
+        if (v == null || v === '') continue;
+        const label = LABELS[k] || k;
+        if (Array.isArray(v)) {
+            if (!v.length) continue;
+            lines.push('<div class="eval-line"><b>' + esc(label) + '</b><ul class="eval-list">'
+                + v.map(x => '<li>' + esc(String(x)) + '</li>').join('') + '</ul></div>');
+        } else {
+            lines.push('<div class="eval-line"><b>' + esc(label) + '：</b>' + esc(String(v)) + '</div>');
+        }
+    }
+    return lines.join('');
+}
+
+function renderItem(r, i) {
+    const ex = r.exercise || {};
+    const res = r.result || {};
+    const score = res.score != null ? res.score : '—';
+    const level = res.level ? ' · ' + esc(res.level) : '';
+    const topic = ex.topic || ex.prompt_type || '';
+    const preview = (r.answer || '').trim() || (ex.source || ex.prompt || '').slice(0, 80);
+    const title = ex.source ? '中文原文' : '写作题干';
+    const ref = ex.reference ? { label: '参考译文', text: ex.reference }
+        : ex.sample_essay ? { label: '参考范文', text: ex.sample_essay } : null;
+    return '' +
+    '<div class="hist-item" id="hist-' + i + '" onclick="toggle(' + i + ')">' +
+        '<div class="hist-head">' +
+            '<span class="hist-type ' + esc(r.type) + '">' + esc(r.type) + '</span>' +
+            '<span class="hist-time">' + esc(r.time) + '</span>' +
+            (topic ? '<span class="badge">' + esc(topic) + '</span>' : '') +
+            '<span class="hist-score">' + esc(String(score)) + ' 分</span>' +
+        '</div>' +
+        '<div class="hist-preview">' + esc(preview) + '</div>' +
+        '<div class="hist-detail">' +
+            '<div class="hd-block"><div class="hd-label">📌 ' + esc(title) + '</div><div class="hd-text">' + esc(ex.source || ex.prompt || '') + '</div></div>' +
+            '<div class="hd-block"><div class="hd-label">✍️ 你的作答</div><div class="hd-text">' + esc(r.answer || '（空）') + '</div></div>' +
+            (ref ? '<div class="hd-block"><div class="hd-label">📝 ' + esc(ref.label) + '</div><div class="hd-text">' + esc(ref.text) + '</div></div>' : '') +
+            '<div class="hd-block">' +
+                '<div class="hd-label">📊 AI 批改</div>' +
+                '<div class="hd-badge">' + esc(String(score)) + ' 分' + level + '</div>' +
+                '<div>' + renderEval(res) + '</div>' +
+            '</div>' +
+        '</div>' +
+    '</div>';
+}
+
+function toggle(i) { document.getElementById('hist-' + i).classList.toggle('open'); }
+
+async function load() {
+    const box = document.getElementById('histList');
+    try {
+        const resp = await fetch('/api/history/list');
+        const d = await resp.json();
+        const recs = (d && d.records) || [];
+        if (!recs.length) {
+            box.innerHTML = '<div class="empty">还没有提交记录。<br>完成一次练习并在评分页点「📥 提交记录」即可。</div>';
+            return;
+        }
+        box.innerHTML = recs.map(renderItem).join('');
+    } catch (e) {
+        box.innerHTML = '<div class="empty" style="color:#c62828">无法加载历史记录（请确认后端已启动）。</div>';
+    }
+}
+load();
+</script>
+</body>
+</html>

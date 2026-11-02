@@ -122,7 +122,7 @@
   <header>
     <div class="logo">🎓</div>
     <h1>CET-6 全流程学习</h1>
-    <p>大学英语六级备考 · 听力 / 阅读 / 翻译 / 写作 / 精读</p>
+    <p>大学英语六级备考 · 翻译 / 写作</p>
     <div class="statusbar" id="statusBar" data-state="off">
       <span class="sdot"></span>
       <span id="statusText">检测服务状态中…</span>
@@ -139,32 +139,13 @@
   </section>
 
   <section>
-    <h2 class="sec-title">🧰 离线工具 <span class="tag">无需服务器 · 直接打开</span></h2>
-    <div class="offline-grid">
-      <a class="card" href="自由学习/CET-6%20听力练习应用.html">
-        <div class="emoji">🎧</div>
-        <div class="name">听力练习应用</div>
-        <div class="desc">本地音频听写与精听，无需联网。</div>
-        <div class="meta"><span class="port">离线</span><span class="status on"><span class="dot"></span>可用</span></div>
-      </a>
-      <a class="card" href="自由学习/%E5%8D%95%E8%AF%8D%E7%AD%9B%E9%80%89%E5%BA%94%E7%94%A8.html">
-        <div class="emoji">🔤</div>
-        <div class="name">单词筛选应用</div>
-        <div class="desc">按考频 / 掌握度筛选四六级词表。</div>
-        <div class="meta"><span class="port">离线</span><span class="status on"><span class="dot"></span>可用</span></div>
-      </a>
-      <a class="card" href="自由学习/%E6%92%AD%E6%94%BE%E5%8F%A5%E5%AD%90.html">
-        <div class="emoji">🔊</div>
-        <div class="name">播放句子</div>
-        <div class="desc">逐句朗读，训练语音与语感。</div>
-        <div class="meta"><span class="port">离线</span><span class="status on"><span class="dot"></span>可用</span></div>
-      </a>
-    </div>
-    <p class="note">
-      更多资料：<a href="自由学习/%E6%8A%80%E5%B7%A7%E5%AD%A6%E4%B9%A0.md">技巧学习.md</a> ·
-      <a href="自由学习/%E6%8F%90%E7%A4%BA%E8%AF%8D.txt">提示词.txt</a> ·
-      <a href="自由学习/%E7%94%B7%E5%A5%B3%E5%A3%B0%E5%88%97%E8%A1%A8.txt">男女声列表.txt</a>
-    </p>
+    <h2 class="sec-title">📜 历史记录 <span class="tag">需启动服务</span></h2>
+    <a class="card" href="http://127.0.0.1:5559/history">
+      <div class="emoji">📜</div>
+      <div class="name">历史记录</div>
+      <div class="desc">查看翻译 / 写作中提交过的所有记录（题目 · 作答 · 得分 · 批改）。</div>
+      <div class="meta"><span class="port">:5559/history</span><span class="status"><span class="dot"></span>打开</span></div>
+    </a>
   </section>
 
   <footer>本地个人学习工具 · 服务仅监听 127.0.0.1，不会暴露到公网</footer>
@@ -172,13 +153,8 @@
 
 <script>
   const APPS = [
-    { emoji: "🎧", name: "听力专项训练", desc: "听写 / 精听，AI 自动评分。",      port: 5555 },
-    { emoji: "🔤", name: "选词填空",     desc: "15 选 10，AI 命题训练。",        port: 5556 },
-    { emoji: "📄", name: "长篇阅读",     desc: "段落信息匹配题。",                port: 5557 },
-    { emoji: "📖", name: "仔细阅读",     desc: "传统单选，深度精读。",            port: 5558 },
-    { emoji: "🌐", name: "翻译",         desc: "段落汉译英，AI 评分批改。",       port: 5559 },
-    { emoji: "✍️", name: "写作",         desc: "命题作文，AI 评分与润色。",       port: 5560 },
-    { emoji: "🔍", name: "精读训练",     desc: "逐句精读，强化长难句理解。",       port: 5561 },
+    { emoji: "🌐", name: "翻译", desc: "段落汉译英，AI 评分批改。", port: 5559 },
+    { emoji: "✍️", name: "写作", desc: "命题作文，AI 评分与润色。", port: 5560 },
   ];
 
   const grid = document.getElementById("appGrid");

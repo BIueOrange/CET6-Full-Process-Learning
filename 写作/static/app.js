@@ -12,7 +12,8 @@
         stage: 'source',
         reached: { source: true },
         answer: '',
-        scored: false
+        scored: false,
+        result: null
     };
     const timer = { handle: null, deadline: 0, remain: 0, paused: false, mins: 30 };
 
@@ -93,6 +94,8 @@
         document.getElementById('answerInput').value = '';
         updateWordCount();
         document.getElementById('scoreBtn').disabled = false;
+        const sb = document.getElementById('submitRecordBtn');
+        if (sb) { sb.disabled = false; sb.textContent = '📥 提交记录'; }
     }
 
     function updateWordCount() {
@@ -113,6 +116,7 @@
         showLoading('AI 正在评估你的作文…');
         try {
             const d = await apiPost('/api/evaluate', { exercise: ex, answer, model: currentModel() });
+            state.result = d.result || {};
             renderScore(d.result || {});
             renderReference();
             state.scored = true;
@@ -197,11 +201,12 @@
         setStage('source'); document.getElementById('topicInput').value = '';
         toast('已重置，请输入主题或留空随机出题', 'ok');
     }
-    async function saveExercise() {
-        if (!state.exercise) { toast('当前没有可保存的练习', 'err'); return; }
+    async function submitRecord() {
+        if (!state.exercise || !state.scored) { toast('请先完成评分再提交', 'err'); return; }
+        const btn = document.getElementById('submitRecordBtn');
         try {
-            const ex = Object.assign({}, state.exercise, { user_answer: state.answer });
-            const d = await apiPost('/api/save', { exercise: ex });
-            toast('已保存到 my/' + (d.path || '').split(/[\\/]/).pop(), 'ok');
-        } catch (e) { toast(e.message || '保存失败', 'err'); }
+            await apiPost('/api/history/save', { exercise: state.exercise, answer: state.answer, result: state.result || {} });
+            if (btn) { btn.disabled = true; btn.textContent = '✅ 已提交'; }
+            toast('已提交到历史记录 ✅', 'ok');
+        } catch (e) { toast(e.message || '提交失败', 'err'); }
     }

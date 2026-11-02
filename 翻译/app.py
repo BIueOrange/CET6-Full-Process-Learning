@@ -176,6 +176,47 @@ def write_to_my(exercise, label="翻译", with_time=False):
     return path
 
 
+HISTORY_DIR = MY_DIR / "history"
+
+
+def save_history(exercise, answer, result):
+    """把一次「提交」写入共享历史目录 my/history/，返回保存路径。"""
+    HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+    now = datetime.now()
+    type_key = exercise.get("type", "translation")
+    rec = {
+        "type": TYPE_LABEL,
+        "type_key": type_key,
+        "time": now.strftime("%Y-%m-%d %H:%M:%S"),
+        "exercise": exercise,
+        "answer": answer or "",
+        "result": result or {},
+    }
+    path = HISTORY_DIR / ("%s-%s.json" % (now.strftime("%Y%m%d-%H%M%S"), type_key))
+    n = 1
+    while path.exists():
+        path = HISTORY_DIR / ("%s-%d-%s.json" % (now.strftime("%Y%m%d-%H%M%S"), n, type_key))
+        n += 1
+    with io.open(path, "w", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False, indent=2))
+    return path
+
+
+def list_history():
+    """读取共享历史目录，按文件名（时间戳）倒序返回，最新的在前。"""
+    HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+    records = []
+    for p in sorted(HISTORY_DIR.glob("*.json"), reverse=True):
+        try:
+            with io.open(p, "r", encoding="utf-8") as f:
+                rec = json.load(f)
+        except (OSError, ValueError):
+            continue
+        rec["file"] = p.name
+        records.append(rec)
+    return records
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -257,6 +298,31 @@ def api_save():
         return jsonify({"ok": True, "path": str(path.relative_to(BASE_DIR.parent))})
     except OSError as e:
         return jsonify({"error": "保存失败：%s" % e}), 500
+
+
+@app.route("/api/history/save", methods=["POST"])
+def api_history_save():
+    data = request.get_json(silent=True) or {}
+    exercise = data.get("exercise")
+    answer = data.get("answer") or ""
+    result = data.get("result") or {}
+    if not isinstance(exercise, dict):
+        return jsonify({"error": "缺少练习数据"}), 400
+    try:
+        path = save_history(exercise, answer, result)
+        return jsonify({"ok": True, "path": str(path.relative_to(BASE_DIR.parent))})
+    except OSError as e:
+        return jsonify({"error": "提交失败：%s" % e}), 500
+
+
+@app.route("/api/history/list")
+def api_history_list():
+    return jsonify({"records": list_history()})
+
+
+@app.route("/history")
+def history_page():
+    return render_template("history.html")
 
 
 def open_browser(port):
