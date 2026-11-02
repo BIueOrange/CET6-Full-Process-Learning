@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CET-6 全流程学习</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --text: #1a2233;
+    --muted: #667085;
+    --line: #e4e8f0;
+    --accent: #4f46e5;
+    --accent-soft: #eef0ff;
+    --up: #16a34a;
+    --down: #98a2b3;
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 4px 16px rgba(16,24,40,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1116;
+      --card: #171b22;
+      --text: #e6e9ef;
+      --muted: #9aa4b2;
+      --line: #262c36;
+      --accent: #818cf8;
+      --accent-soft: #1e2235;
+      --up: #4ade80;
+      --down: #6b7280;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1116; --card: #171b22; --text: #e6e9ef; --muted: #9aa4b2;
+    --line: #262c36; --accent: #818cf8; --accent-soft: #1e2235;
+    --up: #4ade80; --down: #6b7280; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+                 "Microsoft YaHei", "Segoe UI", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 48px 16px 72px; }
+
+  header { text-align: center; margin-bottom: 40px; }
+  header .logo { font-size: 44px; line-height: 1; }
+  header h1 { font-size: 28px; margin: 12px 0 6px; letter-spacing: .5px; }
+  header p { color: var(--muted); margin: 0; font-size: 15px; }
+  .hint {
+    margin: 20px auto 0; max-width: 640px;
+    background: var(--accent-soft); color: var(--accent);
+    border-radius: 10px; padding: 10px 16px; font-size: 13.5px;
+  }
+  .hint code {
+    background: transparent; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px; border: 1px solid currentColor; border-radius: 5px; padding: 0 5px;
+    opacity: .9;
+  }
+  .statusbar {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin: 16px auto 0; max-width: 640px;
+    border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600;
+    background: var(--card); border: 1px solid var(--line); color: var(--down);
+  }
+  .statusbar .sdot { width: 10px; height: 10px; border-radius: 50%; background: var(--down); flex: none; }
+  .statusbar[data-state="on"] { color: var(--up); border-color: color-mix(in srgb, var(--up) 35%, var(--line)); }
+  .statusbar[data-state="on"] .sdot { background: var(--up); box-shadow: 0 0 0 3px color-mix(in srgb, var(--up) 20%, transparent); }
+  .statusbar[data-state="partial"] { color: #d97706; }
+  .statusbar[data-state="partial"] .sdot { background: #d97706; }
+
+  section { margin-top: 40px; }
+  .sec-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 17px; font-weight: 600; margin: 0 0 16px;
+  }
+  .sec-title .tag {
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px;
+  }
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px;
+  }
+
+  a.card {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; box-shadow: var(--shadow);
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  a.card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 6px 24px rgba(79,70,229,.14); }
+  .card .emoji { font-size: 28px; line-height: 1; }
+  .card .name { font-size: 16px; font-weight: 600; margin: 12px 0 4px; }
+  .card .desc { font-size: 13px; color: var(--muted); margin: 0 0 14px; min-height: 2.6em; }
+  .card .meta { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+  .card .port { color: var(--muted); font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .status { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+  .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--down); flex: none; }
+  .status.on { color: var(--up); } .status.on .dot { background: var(--up); box-shadow: 0 0 0 3px color-mix(in srgb, var(--up) 20%, transparent); }
+  .status.off { color: var(--down); }
+
+  .offline-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .note {
+    margin-top: 14px; font-size: 12.5px; color: var(--muted);
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  }
+  .note a { color: var(--accent); text-decoration: none; }
+  .note a:hover { text-decoration: underline; }
+
+  footer { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 56px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">🎓</div>
+    <h1>CET-6 全流程学习</h1>
+    <p>大学英语六级备考 · 听力 / 阅读 / 翻译 / 写作 / 精读</p>
+    <div class="statusbar" id="statusBar" data-state="off">
+      <span class="sdot"></span>
+      <span id="statusText">检测服务状态中…</span>
+    </div>
+    <div class="hint">
+      双击桌面「CET6学习」图标启动服务，关闭该 App 即自动停止全部服务。
+      状态每 5 秒自动刷新。
+    </div>
+  </header>
+
+  <section>
+    <h2 class="sec-title">📚 在线训练 <span class="tag">需启动服务</span></h2>
+    <div class="grid" id="appGrid"></div>
+  </section>
+
+  <section>
+    <h2 class="sec-title">🧰 离线工具 <span class="tag">无需服务器 · 直接打开</span></h2>
+    <div class="offline-grid">
+      <a class="card" href="自由学习/CET-6%20听力练习应用.html">
+        <div class="emoji">🎧</div>
+        <div class="name">听力练习应用</div>
+        <div class="desc">本地音频听写与精听，无需联网。</div>
+        <div class="meta"><span class="port">离线</span><span class="status on"><span class="dot"></span>可用</span></div>
+      </a>
+      <a class="card" href="自由学习/%E5%8D%95%E8%AF%8D%E7%AD%9B%E9%80%89%E5%BA%94%E7%94%A8.html">
+        <div class="emoji">🔤</div>
+        <div class="name">单词筛选应用</div>
+        <div class="desc">按考频 / 掌握度筛选四六级词表。</div>
+        <div class="meta"><span class="port">离线</span><span class="status on"><span class="dot"></span>可用</span></div>
+      </a>
+      <a class="card" href="自由学习/%E6%92%AD%E6%94%BE%E5%8F%A5%E5%AD%90.html">
+        <div class="emoji">🔊</div>
+        <div class="name">播放句子</div>
+        <div class="desc">逐句朗读，训练语音与语感。</div>
+        <div class="meta"><span class="port">离线</span><span class="status on"><span class="dot"></span>可用</span></div>
+      </a>
+    </div>
+    <p class="note">
+      更多资料：<a href="自由学习/%E6%8A%80%E5%B7%A7%E5%AD%A6%E4%B9%A0.md">技巧学习.md</a> ·
+      <a href="自由学习/%E6%8F%90%E7%A4%BA%E8%AF%8D.txt">提示词.txt</a> ·
+      <a href="自由学习/%E7%94%B7%E5%A5%B3%E5%A3%B0%E5%88%97%E8%A1%A8.txt">男女声列表.txt</a>
+    </p>
+  </section>
+
+  <footer>本地个人学习工具 · 服务仅监听 127.0.0.1，不会暴露到公网</footer>
+</div>
+
+<script>
+  const APPS = [
+    { emoji: "🎧", name: "听力专项训练", desc: "听写 / 精听，AI 自动评分。",      port: 5555 },
+    { emoji: "🔤", name: "选词填空",     desc: "15 选 10，AI 命题训练。",        port: 5556 },
+    { emoji: "📄", name: "长篇阅读",     desc: "段落信息匹配题。",                port: 5557 },
+    { emoji: "📖", name: "仔细阅读",     desc: "传统单选，深度精读。",            port: 5558 },
+    { emoji: "🌐", name: "翻译",         desc: "段落汉译英，AI 评分批改。",       port: 5559 },
+    { emoji: "✍️", name: "写作",         desc: "命题作文，AI 评分与润色。",       port: 5560 },
+    { emoji: "🔍", name: "精读训练",     desc: "逐句精读，强化长难句理解。",       port: 5561 },
+  ];
+
+  const grid = document.getElementById("appGrid");
+
+  APPS.forEach((app, i) => {
+    const el = document.createElement("a");
+    el.className = "card";
+    el.href = `http://127.0.0.1:${app.port}`;
+    el.innerHTML = `
+      <div class="emoji">${app.emoji}</div>
+      <div class="name">${app.name}</div>
+      <div class="desc">${app.desc}</div>
+      <div class="meta">
+        <span class="port">:${app.port}</span>
+        <span class="status off" data-idx="${i}"><span class="dot"></span>检测中…</span>
+      </div>`;
+    grid.appendChild(el);
+  });
+
+  // 用 no-cors fetch 探测端口是否可达（能连上即“运行中”，连不上即“未启动”）
+  const states = [];
+  function check(i, url) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+    fetch(url, { mode: "no-cors", signal: ctrl.signal })
+      .then(() => set(i, true))
+      .catch(() => set(i, false))
+      .finally(() => clearTimeout(timer));
+  }
+  function set(i, on) {
+    const st = document.querySelector(`.status[data-idx="${i}"]`);
+    if (!st) return;
+    st.className = `status ${on ? "on" : "off"}`;
+    st.lastChild.textContent = on ? " 运行中" : " 未启动";
+    states[i] = on;
+    updateBanner();
+  }
+  function updateBanner() {
+    const bar = document.getElementById("statusBar");
+    const txt = document.getElementById("statusText");
+    if (!bar || !txt) return;
+    const n = states.filter(v => v === true).length;
+    if (n === APPS.length) {
+      bar.dataset.state = "on";
+      txt.textContent = `服务运行中（${n}/${APPS.length}）`;
+    } else if (n === 0) {
+      bar.dataset.state = "off";
+      txt.textContent = "服务未启动 —— 双击桌面「CET6学习」图标启动";
+    } else {
+      bar.dataset.state = "partial";
+      txt.textContent = `部分服务运行中（${n}/${APPS.length}）`;
+    }
+  }
+
+  function refresh() {
+    APPS.forEach((app, i) => check(i, `http://127.0.0.1:${app.port}/`));
+  }
+  refresh();
+  setInterval(refresh, 5000);   // 每 5 秒自动刷新状态
+</script>
+</body>
+</html>
